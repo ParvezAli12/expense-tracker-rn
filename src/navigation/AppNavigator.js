@@ -3,6 +3,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from '../screens/HomeScreen';
 import AddTransactionScreen from '../screens/AddTransactionScreen';
 import StatsScreen from '../screens/StatsScreen';
+import PeopleScreen from '../screens/PeopleScreen';
+import PersonDetailScreen from '../screens/PersonDetailScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -30,6 +32,16 @@ const AppNavigator = () => {
         name="Stats"
         component={StatsScreen}
         options={{ title: 'Statistics' }}
+      />
+      <Stack.Screen
+        name="People"
+        component={PeopleScreen}
+        options={{ title: 'Borrow & Lend' }}
+      />
+      <Stack.Screen
+        name="PersonDetail"
+        component={PersonDetailScreen}
+        options={({ route }) => ({ title: route.params.personName })}
       />
     </Stack.Navigator>
   );
