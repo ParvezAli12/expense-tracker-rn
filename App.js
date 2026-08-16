@@ -5,6 +5,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { TransactionProvider, useTransactions } from './src/context/TransactionContext';
 import AppNavigator from './src/navigation/AppNavigator';
+import { IouProvider, useIous } from './src/context/IouContext';
 
 // Inner component so it can access the context (setup/isReady) after the provider mounts
 const Root = () => {
@@ -31,9 +32,11 @@ const Root = () => {
 
 export default function App() {
   return (
-    <SafeAreaProvider>
+<SafeAreaProvider>
       <TransactionProvider>
-        <Root />
+        <IouProvider>
+          <Root />
+        </IouProvider>
       </TransactionProvider>
       <StatusBar style="light" />
     </SafeAreaProvider>
