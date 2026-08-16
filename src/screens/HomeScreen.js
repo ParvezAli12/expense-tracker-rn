@@ -21,9 +21,14 @@ const HomeScreen = ({ navigation }) => {
 
       <View style={styles.listHeader}>
         <Text style={styles.listTitle}>Recent Transactions</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Stats')}>
-          <Text style={styles.statsLink}>View Stats</Text>
-        </TouchableOpacity>
+        <View style={styles.headerLinks}>
+          <TouchableOpacity onPress={() => navigation.navigate('People')}>
+            <Text style={styles.statsLink}>Borrow & Lend</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('Stats')}>
+            <Text style={styles.statsLink}>View Stats</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <FlatList
@@ -69,6 +74,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginTop: 24,
     marginBottom: 12,
+  },
+  headerLinks: {
+    flexDirection: 'row',
+    gap: 16,
   },
   listTitle: {
     fontSize: 16,
