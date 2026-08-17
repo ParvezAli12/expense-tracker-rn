@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,8 +8,8 @@ import {
   TextInput,
   Modal,
   Alert,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useIous } from '../context/IouContext';
@@ -31,7 +31,6 @@ const PersonDetailScreen = ({ route, navigation }) => {
     setIous(fetchIousForPerson(personId));
   }, [fetchIousForPerson, personId]);
 
-  // Reload every time this screen comes into focus (e.g. after adding an IOU)
   useFocusEffect(
     useCallback(() => {
       loadIous();
