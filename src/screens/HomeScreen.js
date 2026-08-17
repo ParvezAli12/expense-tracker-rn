@@ -5,8 +5,8 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTransactions } from '../context/TransactionContext';
 import SummaryCard from '../components/SummaryCard';
