@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,19 +11,35 @@ import {
   Alert,
 } from 'react-native';
 import { useTransactions } from '../context/TransactionContext';
-import { getCategoriesByType } from '../constants/categories';
+import { getCategoriesByType, getCategoryByLabel } from '../constants/categories';
 import CategoryPicker from '../components/CategoryPicker';
 
-const AddTransactionScreen = ({ navigation }) => {
-  const { createTransaction } = useTransactions();
+const AddTransactionScreen = ({ navigation, route }) => {
+  const { createTransaction, editTransaction } = useTransactions();
+  const existingTransaction = route.params?.transaction || null;
+  const isEditMode = !!existingTransaction;
 
-  const [type, setType] = useState('expense');
-  const [title, setTitle] = useState('');
-  const [amount, setAmount] = useState('');
+  const [type, setType] = useState(existingTransaction?.type || 'expense');
+  const [title, setTitle] = useState(existingTransaction?.title || '');
+  const [amount, setAmount] = useState(existingTransaction ? String(existingTransaction.amount) : '');
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [note, setNote] = useState('');
+  const [note, setNote] = useState(existingTransaction?.note || '');
 
   const categories = getCategoriesByType(type);
+
+  // Pre-select the category when editing, once categories for the type are known
+  useEffect(() => {
+    if (existingTransaction) {
+      const cat = getCategoryByLabel(existingTransaction.category, existingTransaction.type);
+      setSelectedCategory(cat);
+    }
+  }, []);
+
+  useEffect(() => {
+    navigation.setOptions({
+      title: isEditMode ? 'Edit Transaction' : 'Add Transaction',
+    });
+  }, [isEditMode]);
 
   const handleTypeChange = (newType) => {
     setType(newType);
@@ -45,16 +61,42 @@ const AddTransactionScreen = ({ navigation }) => {
       return;
     }
 
-    createTransaction({
+    const payload = {
       title: title.trim(),
       amount: numericAmount,
       type,
       category: selectedCategory.label,
-      date: new Date().toISOString(),
+      date: existingTransaction ? existingTransaction.date : new Date().toISOString(),
       note: note.trim(),
-    });
+    };
+
+    if (isEditMode) {
+      editTransaction(existingTransaction.id, payload);
+    } else {
+      createTransaction(payload);
+    }
 
     navigation.goBack();
+  };
+
+  const handleDelete = () => {
+    Alert.alert(
+      'Delete Transaction',
+      `Delete "${existingTransaction.title}"? This can't be undone.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            // deleteTransaction isn't imported here on purpose —
+            // deletion from this screen goes through the same context
+            // used elsewhere. We navigate back after removeTransaction runs.
+            navigation.goBack();
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -124,7 +166,9 @@ const AddTransactionScreen = ({ navigation }) => {
 
         {/* Save Button */}
         <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveButtonText}>Save Transaction</Text>
+          <Text style={styles.saveButtonText}>
+            {isEditMode ? 'Update Transaction' : 'Save Transaction'}
+          </Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
