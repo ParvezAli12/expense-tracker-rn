@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { getCategoryByLabel } from '../constants/categories';
 
-const TransactionItem = ({ transaction, onDelete }) => {
+const TransactionItem = ({ transaction, onDelete, onPress }) => {
   const { title, amount, type, category, date, note } = transaction;
   const categoryData = getCategoryByLabel(category, type);
   const isExpense = type === 'expense';
@@ -27,6 +27,7 @@ const TransactionItem = ({ transaction, onDelete }) => {
   return (
     <TouchableOpacity
       style={styles.container}
+      onPress={onPress}
       onLongPress={handleLongPress}
       activeOpacity={0.7}
     >
@@ -85,7 +86,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
     fontStyle: 'italic',
   },
-amount: {
+  amount: {
     fontSize: 14,
     fontWeight: '700',
     marginLeft: 8,
