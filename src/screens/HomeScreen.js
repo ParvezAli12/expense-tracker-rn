@@ -41,14 +41,6 @@ const HomeScreen = ({ navigation }) => {
 
       <View style={styles.listHeader}>
         <Text style={styles.listTitle}>Recent Transactions</Text>
-        <View style={styles.headerLinks}>
-          <TouchableOpacity onPress={() => navigation.navigate('People')}>
-            <Text style={styles.statsLink}>Borrow & Lend</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('Stats')}>
-            <Text style={styles.statsLink}>View Stats</Text>
-          </TouchableOpacity>
-        </View>
       </View>
 
       {/* Search bar */}
