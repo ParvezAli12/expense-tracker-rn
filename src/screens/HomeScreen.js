@@ -19,8 +19,25 @@ const FILTERS = [
   { id: 'expense', label: 'Expense' },
 ];
 
+const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+
 const HomeScreen = ({ navigation }) => {
-  const { transactions, summary, removeTransaction } = useTransactions();
+  const {
+    transactions,
+    summary,
+    removeTransaction,
+    selectedYear,
+    selectedMonth,
+    isPrevDisabled,
+    isNextDisabled,
+    goToPrevMonth,
+    goToNextMonth,
+    goToCurrentMonth,
+  } = useTransactions();
+
   const [searchText, setSearchText] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
 
@@ -35,12 +52,40 @@ const HomeScreen = ({ navigation }) => {
     });
   }, [transactions, searchText, activeFilter]);
 
+  const isCurrentMonth = isNextDisabled; // next is disabled exactly when we're on the real current month
+
   return (
     <SafeAreaView style={styles.container}>
+      {/* Month Navigation */}
+      <View style={styles.monthNav}>
+        <TouchableOpacity
+          onPress={goToPrevMonth}
+          disabled={isPrevDisabled}
+          style={[styles.monthArrow, isPrevDisabled && styles.monthArrowDisabled]}
+        >
+          <Ionicons name="chevron-back" size={22} color={isPrevDisabled ? '#444' : '#FFFFFF'} />
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={goToCurrentMonth} disabled={isCurrentMonth}>
+          <Text style={styles.monthText}>
+            {MONTH_NAMES[selectedMonth - 1]} {selectedYear}
+          </Text>
+          {!isCurrentMonth && <Text style={styles.todayLink}>Jump to today</Text>}
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={goToNextMonth}
+          disabled={isNextDisabled}
+          style={[styles.monthArrow, isNextDisabled && styles.monthArrowDisabled]}
+        >
+          <Ionicons name="chevron-forward" size={22} color={isNextDisabled ? '#444' : '#FFFFFF'} />
+        </TouchableOpacity>
+      </View>
+
       <SummaryCard summary={summary} />
 
       <View style={styles.listHeader}>
-        <Text style={styles.listTitle}>Recent Transactions</Text>
+        <Text style={styles.listTitle}>Transactions</Text>
       </View>
 
       {/* Search bar */}
@@ -93,10 +138,10 @@ const HomeScreen = ({ navigation }) => {
           <View style={styles.emptyState}>
             <Ionicons name="wallet-outline" size={48} color="#555" />
             <Text style={styles.emptyText}>
-              {transactions.length === 0 ? 'No transactions yet' : 'No matching transactions'}
+              {transactions.length === 0 ? 'No transactions this month' : 'No matching transactions'}
             </Text>
             <Text style={styles.emptySubtext}>
-              {transactions.length === 0 ? 'Tap + to add your first one' : 'Try a different search or filter'}
+              {transactions.length === 0 ? 'Tap + to add one' : 'Try a different search or filter'}
             </Text>
           </View>
         }
@@ -119,6 +164,38 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#1E1E2E',
   },
+  monthNav: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 16,
+    paddingHorizontal: 20,
+    gap: 20,
+  },
+  monthArrow: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#2A2A3C',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  monthArrowDisabled: {
+    backgroundColor: '#22222E',
+  },
+  monthText: {
+    color: '#FFFFFF',
+    fontSize: 17,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  todayLink: {
+    color: '#6C5CE7',
+    fontSize: 11,
+    textAlign: 'center',
+    marginTop: 2,
+    fontWeight: '600',
+  },
   listHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -127,19 +204,10 @@ const styles = StyleSheet.create({
     marginTop: 24,
     marginBottom: 12,
   },
-  headerLinks: {
-    flexDirection: 'row',
-    gap: 16,
-  },
   listTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: '#FFFFFF',
-  },
-  statsLink: {
-    fontSize: 14,
-    color: '#6C5CE7',
-    fontWeight: '500',
   },
   searchContainer: {
     flexDirection: 'row',
