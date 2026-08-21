@@ -204,4 +204,62 @@ export const getOverallIouSummary = () => {
   };
 };
 
+// ===== MONTH-SCOPED QUERIES =====
+
+// Helper — format a JS Date's year/month into 'YYYY-MM' for SQLite comparison
+const formatYearMonth = (year, month) => {
+  const paddedMonth = String(month).padStart(2, '0');
+  return `${year}-${paddedMonth}`;
+};
+
+export const getTransactionsByMonth = (year, month) => {
+  const yearMonth = formatYearMonth(year, month);
+  return db.getAllSync(
+    `SELECT * FROM transactions
+     WHERE strftime('%Y-%m', date) = ?
+     ORDER BY date DESC;`,
+    [yearMonth]
+  );
+};
+
+export const getSummaryByMonth = (year, month) => {
+  const yearMonth = formatYearMonth(year, month);
+  const income = db.getFirstSync(
+    `SELECT COALESCE(SUM(amount), 0) as total FROM transactions
+     WHERE type = 'income' AND strftime('%Y-%m', date) = ?;`,
+    [yearMonth]
+  );
+  const expense = db.getFirstSync(
+    `SELECT COALESCE(SUM(amount), 0) as total FROM transactions
+     WHERE type = 'expense' AND strftime('%Y-%m', date) = ?;`,
+    [yearMonth]
+  );
+  return {
+    income: income.total,
+    expense: expense.total,
+    balance: income.total - expense.total,
+  };
+};
+
+export const getCategoryTotalsByMonth = (year, month) => {
+  const yearMonth = formatYearMonth(year, month);
+  return db.getAllSync(
+    `SELECT category, SUM(amount) as total
+     FROM transactions
+     WHERE type = 'expense' AND strftime('%Y-%m', date) = ?
+     GROUP BY category
+     ORDER BY total DESC;`,
+    [yearMonth]
+  );
+};
+
+// Returns the earliest transaction's year/month — used to stop "previous month"
+// navigation once we've gone back as far as the data actually goes
+export const getEarliestTransactionMonth = () => {
+  const row = db.getFirstSync(
+    `SELECT MIN(date) as earliest FROM transactions;`
+  );
+  return row.earliest; // ISO string or null if no transactions exist
+};
+
 export default db;
