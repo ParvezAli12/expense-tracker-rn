@@ -1,17 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import { PieChart } from 'react-native-chart-kit';
 import { useTransactions } from '../context/TransactionContext';
 import { getCategoryByLabel } from '../constants/categories';
+import MonthNavigator from '../components/MonthNavigator';
 
 const screenWidth = Dimensions.get('window').width;
-
-const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
-];
 
 const StatsScreen = () => {
   const {
@@ -40,28 +35,14 @@ const StatsScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Month Navigation */}
-      <View style={styles.monthNav}>
-        <TouchableOpacity
-          onPress={goToPrevMonth}
-          disabled={isPrevDisabled}
-          style={[styles.monthArrow, isPrevDisabled && styles.monthArrowDisabled]}
-        >
-          <Ionicons name="chevron-back" size={22} color={isPrevDisabled ? '#444' : '#FFFFFF'} />
-        </TouchableOpacity>
-
-        <Text style={styles.monthText}>
-          {MONTH_NAMES[selectedMonth - 1]} {selectedYear}
-        </Text>
-
-        <TouchableOpacity
-          onPress={goToNextMonth}
-          disabled={isNextDisabled}
-          style={[styles.monthArrow, isNextDisabled && styles.monthArrowDisabled]}
-        >
-          <Ionicons name="chevron-forward" size={22} color={isNextDisabled ? '#444' : '#FFFFFF'} />
-        </TouchableOpacity>
-      </View>
+      <MonthNavigator
+        year={selectedYear}
+        month={selectedMonth}
+        isPrevDisabled={isPrevDisabled}
+        isNextDisabled={isNextDisabled}
+        onPrev={goToPrevMonth}
+        onNext={goToNextMonth}
+      />
 
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.heading}>Expense Breakdown</Text>
@@ -81,31 +62,35 @@ const StatsScreen = () => {
           />
         ) : (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>No expenses this month yet</Text>
+            <Text style={styles.emptyText}>No expenses this month</Text>
           </View>
         )}
 
         <View style={styles.listSection}>
           <Text style={styles.listHeading}>By Category</Text>
-          {categoryTotals.map((item) => {
-            const categoryData = getCategoryByLabel(item.category, 'expense');
-            const percentage = summary.expense > 0
-              ? ((item.total / summary.expense) * 100).toFixed(1)
-              : 0;
+          {categoryTotals.length === 0 ? (
+            <Text style={styles.noCategoryText}>Nothing to show here yet</Text>
+          ) : (
+            categoryTotals.map((item) => {
+              const categoryData = getCategoryByLabel(item.category, 'expense');
+              const percentage = summary.expense > 0
+                ? ((item.total / summary.expense) * 100).toFixed(1)
+                : 0;
 
-            return (
-              <View key={item.category} style={styles.row}>
-                <View style={styles.rowLeft}>
-                  <View style={[styles.dot, { backgroundColor: categoryData.color }]} />
-                  <Text style={styles.rowLabel}>{item.category}</Text>
+              return (
+                <View key={item.category} style={styles.row}>
+                  <View style={styles.rowLeft}>
+                    <View style={[styles.dot, { backgroundColor: categoryData.color }]} />
+                    <Text style={styles.rowLabel}>{item.category}</Text>
+                  </View>
+                  <View style={styles.rowRight}>
+                    <Text style={styles.rowAmount}>Rs {item.total.toLocaleString('en-PK')}</Text>
+                    <Text style={styles.rowPercent}>{percentage}%</Text>
+                  </View>
                 </View>
-                <View style={styles.rowRight}>
-                  <Text style={styles.rowAmount}>Rs {item.total.toLocaleString('en-PK')}</Text>
-                  <Text style={styles.rowPercent}>{percentage}%</Text>
-                </View>
-              </View>
-            );
-          })}
+              );
+            })
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -119,30 +104,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#1E1E2E',
   },
-  monthNav: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 16,
-    paddingHorizontal: 20,
-    gap: 20,
-  },
-  monthArrow: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#2A2A3C',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  monthArrowDisabled: {
-    backgroundColor: '#22222E',
-  },
-  monthText: {
-    color: '#FFFFFF',
-    fontSize: 17,
-    fontWeight: '700',
-  },
   content: {
     padding: 20,
     paddingBottom: 60,
@@ -152,6 +113,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     marginBottom: 16,
+    marginTop: 8,
   },
   emptyState: {
     alignItems: 'center',
@@ -170,6 +132,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+  },
+  noCategoryText: {
+    color: '#666666',
+    fontSize: 13,
+    textAlign: 'center',
+    paddingVertical: 20,
   },
   row: {
     flexDirection: 'row',
