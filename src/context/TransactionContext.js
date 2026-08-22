@@ -7,10 +7,12 @@ import {
   getTransactionsByMonth,
   getSummaryByMonth,
   getCategoryTotalsByMonth,
-  getEarliestTransactionMonth,
 } from '../database/db';
 
 const TransactionContext = createContext(null);
+
+// How far back a user can browse — generous enough for real use, prevents infinite scrolling
+const MAX_MONTHS_BACK = 60; // 5 years
 
 export const TransactionProvider = ({ children }) => {
   const now = new Date();
@@ -21,16 +23,16 @@ export const TransactionProvider = ({ children }) => {
   const [summary, setSummary] = useState({ income: 0, expense: 0, balance: 0 });
   const [categoryTotals, setCategoryTotals] = useState([]);
   const [isReady, setIsReady] = useState(false);
-  const [earliestMonth, setEarliestMonth] = useState(null); // ISO string or null
 
   // Pull fresh data for the currently selected month
   const refresh = useCallback((year = selectedYear, month = selectedMonth) => {
     setTransactions(getTransactionsByMonth(year, month));
     setSummary(getSummaryByMonth(year, month));
     setCategoryTotals(getCategoryTotalsByMonth(year, month));
-    setEarliestMonth(getEarliestTransactionMonth());
   }, [selectedYear, selectedMonth]);
 
+  // Always starts on today's real year/month — fresh every app launch since
+  // this state is initialized from `new Date()` above, not persisted anywhere
   const setup = useCallback(() => {
     initDatabase();
     refresh(selectedYear, selectedMonth);
@@ -52,7 +54,6 @@ export const TransactionProvider = ({ children }) => {
     refresh();
   }, [refresh]);
 
-  // Move to the previous month (wraps year backward at January)
   const goToPrevMonth = useCallback(() => {
     let newYear = selectedYear;
     let newMonth = selectedMonth - 1;
@@ -65,7 +66,6 @@ export const TransactionProvider = ({ children }) => {
     refresh(newYear, newMonth);
   }, [selectedYear, selectedMonth, refresh]);
 
-  // Move to the next month (wraps year forward at December)
   const goToNextMonth = useCallback(() => {
     let newYear = selectedYear;
     let newMonth = selectedMonth + 1;
@@ -78,7 +78,6 @@ export const TransactionProvider = ({ children }) => {
     refresh(newYear, newMonth);
   }, [selectedYear, selectedMonth, refresh]);
 
-  // Jump back to the current real-world month
   const goToCurrentMonth = useCallback(() => {
     const today = new Date();
     const year = today.getFullYear();
@@ -88,19 +87,16 @@ export const TransactionProvider = ({ children }) => {
     refresh(year, month);
   }, [refresh]);
 
-  // Whether "previous month" should be disabled — true once we've gone back
-  // past the month of the earliest transaction in the database
+  // Prev is disabled only after a generous 5-year lookback — not tied to
+  // whether data exists, so you can always browse to an empty past month
   const isPrevDisabled = useMemo(() => {
-    if (!earliestMonth) return true; // no transactions at all yet
-    const earliest = new Date(earliestMonth);
-    const earliestYear = earliest.getFullYear();
-    const earliestMonthNum = earliest.getMonth() + 1;
-    if (selectedYear < earliestYear) return true;
-    if (selectedYear === earliestYear && selectedMonth <= earliestMonthNum) return true;
-    return false;
-  }, [earliestMonth, selectedYear, selectedMonth]);
+    const today = new Date();
+    const monthsDiff =
+      (today.getFullYear() - selectedYear) * 12 + (today.getMonth() + 1 - selectedMonth);
+    return monthsDiff >= MAX_MONTHS_BACK;
+  }, [selectedYear, selectedMonth]);
 
-  // Whether "next month" should be disabled — true once we're at the real current month
+  // Next is disabled once we're at the real current month — no future browsing
   const isNextDisabled = useMemo(() => {
     const today = new Date();
     const currentYear = today.getFullYear();
