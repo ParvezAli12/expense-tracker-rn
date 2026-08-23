@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { COLORS, SPACING, RADIUS, FONT } from '../constants/theme';
 
 const CategoryPicker = ({ categories, selected, onSelect }) => {
   return (
@@ -19,7 +20,7 @@ const CategoryPicker = ({ categories, selected, onSelect }) => {
             <Ionicons
               name={category.icon}
               size={16}
-              color={isSelected ? '#FFFFFF' : category.color}
+              color={isSelected ? COLORS.textPrimary : category.color}
             />
             <Text style={[styles.chipText, isSelected && styles.chipTextActive]}>
               {category.label}
@@ -37,26 +38,26 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
+    gap: SPACING.sm + 2,
   },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 20,
+    gap: SPACING.xs + 2,
+    paddingVertical: SPACING.sm + 2,
+    paddingHorizontal: SPACING.md + 2,
+    borderRadius: RADIUS.full,
     borderWidth: 1.5,
-    borderColor: '#3A3A4C',
-    backgroundColor: '#2A2A3C',
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.surface,
   },
   chipText: {
     color: '#CCCCCC',
-    fontSize: 13,
+    fontSize: FONT.base,
     fontWeight: '500',
   },
   chipTextActive: {
-    color: '#FFFFFF',
+    color: COLORS.textPrimary,
     fontWeight: '700',
   },
 });
