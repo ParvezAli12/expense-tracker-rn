@@ -5,6 +5,7 @@ import { PieChart } from 'react-native-chart-kit';
 import { useTransactions } from '../context/TransactionContext';
 import { getCategoryByLabel } from '../constants/categories';
 import MonthNavigator from '../components/MonthNavigator';
+import { COLORS, SPACING, RADIUS, FONT } from '../constants/theme';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -44,22 +45,22 @@ const StatsScreen = () => {
         onNext={goToNextMonth}
       />
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.heading}>Expense Breakdown</Text>
 
         {hasData ? (
-          <PieChart
-            data={chartData}
-            width={screenWidth - 40}
-            height={220}
-            chartConfig={{
-              color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            }}
-            accessor="population"
-            backgroundColor="transparent"
-            paddingLeft="15"
-            absolute
-          />
+          <View style={styles.chartWrapper}>
+            <PieChart
+              data={chartData}
+              width={screenWidth - SPACING.xl * 2}
+              height={220}
+              chartConfig={{ color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})` }}
+              accessor="population"
+              backgroundColor="transparent"
+              paddingLeft="15"
+              absolute
+            />
+          </View>
         ) : (
           <View style={styles.emptyState}>
             <Text style={styles.emptyText}>No expenses this month</Text>
@@ -102,56 +103,58 @@ export default StatsScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1E1E2E',
+    backgroundColor: COLORS.background,
   },
   content: {
-    padding: 20,
+    padding: SPACING.xl,
     paddingBottom: 60,
   },
   heading: {
-    color: '#FFFFFF',
-    fontSize: 18,
+    color: COLORS.textPrimary,
+    fontSize: FONT.xxl,
     fontWeight: '700',
-    marginBottom: 16,
-    marginTop: 8,
+    marginBottom: SPACING.lg,
+  },
+  chartWrapper: {
+    alignItems: 'center',
   },
   emptyState: {
     alignItems: 'center',
     paddingVertical: 60,
   },
   emptyText: {
-    color: '#777777',
-    fontSize: 14,
+    color: COLORS.textMuted,
+    fontSize: FONT.md,
   },
   listSection: {
-    marginTop: 28,
+    marginTop: SPACING.xxl + 4,
   },
   listHeading: {
-    color: '#AAAAAA',
-    fontSize: 13,
-    marginBottom: 12,
+    color: COLORS.textSecondary,
+    fontSize: FONT.base,
+    marginBottom: SPACING.md,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   noCategoryText: {
-    color: '#666666',
-    fontSize: 13,
+    color: COLORS.textFaint,
+    fontSize: FONT.base,
     textAlign: 'center',
-    paddingVertical: 20,
+    paddingVertical: SPACING.xxl,
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#2A2A3C',
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 8,
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.md,
+    padding: SPACING.lg - 2,
+    marginBottom: SPACING.sm,
   },
   rowLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: SPACING.sm + 2,
   },
   dot: {
     width: 10,
@@ -159,21 +162,21 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   rowLabel: {
-    color: '#FFFFFF',
-    fontSize: 14,
+    color: COLORS.textPrimary,
+    fontSize: FONT.md,
     fontWeight: '500',
   },
   rowRight: {
     alignItems: 'flex-end',
   },
   rowAmount: {
-    color: '#FFFFFF',
-    fontSize: 14,
+    color: COLORS.textPrimary,
+    fontSize: FONT.md,
     fontWeight: '600',
   },
   rowPercent: {
-    color: '#888888',
-    fontSize: 12,
+    color: COLORS.textMuted,
+    fontSize: FONT.sm,
     marginTop: 2,
   },
 });
