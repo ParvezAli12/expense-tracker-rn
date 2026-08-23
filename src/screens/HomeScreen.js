@@ -13,6 +13,7 @@ import { useTransactions } from '../context/TransactionContext';
 import SummaryCard from '../components/SummaryCard';
 import TransactionItem from '../components/TransactionItem';
 import MonthNavigator from '../components/MonthNavigator';
+import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '../constants/theme';
 
 const FILTERS = [
   { id: 'all', label: 'All' },
@@ -63,28 +64,24 @@ const HomeScreen = ({ navigation }) => {
 
       <SummaryCard summary={summary} />
 
-      <View style={styles.listHeader}>
-        <Text style={styles.listTitle}>Transactions</Text>
-      </View>
+      <Text style={styles.sectionTitle}>Transactions</Text>
 
-      {/* Search bar */}
       <View style={styles.searchContainer}>
-        <Ionicons name="search" size={18} color="#666" style={styles.searchIcon} />
+        <Ionicons name="search" size={18} color={COLORS.textFaint} style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
           placeholder="Search transactions..."
-          placeholderTextColor="#666"
+          placeholderTextColor={COLORS.textFaint}
           value={searchText}
           onChangeText={setSearchText}
         />
         {searchText.length > 0 && (
-          <TouchableOpacity onPress={() => setSearchText('')}>
-            <Ionicons name="close-circle" size={18} color="#666" />
+          <TouchableOpacity onPress={() => setSearchText('')} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <Ionicons name="close-circle" size={18} color={COLORS.textFaint} />
           </TouchableOpacity>
         )}
       </View>
 
-      {/* Filter chips */}
       <View style={styles.filterRow}>
         {FILTERS.map((filter) => {
           const isActive = activeFilter === filter.id;
@@ -126,11 +123,8 @@ const HomeScreen = ({ navigation }) => {
         }
       />
 
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => navigation.navigate('AddTransaction')}
-      >
-        <Ionicons name="add" size={30} color="#FFFFFF" />
+      <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate('AddTransaction')}>
+        <Ionicons name="add" size={30} color={COLORS.textPrimary} />
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -141,67 +135,62 @@ export default HomeScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1E1E2E',
+    backgroundColor: COLORS.background,
   },
-  listHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    marginTop: 24,
-    marginBottom: 12,
-  },
-  listTitle: {
-    fontSize: 16,
+  sectionTitle: {
+    fontSize: FONT.xl,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: COLORS.textPrimary,
+    paddingHorizontal: SPACING.xl,
+    marginTop: SPACING.xxl,
+    marginBottom: SPACING.md,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#2A2A3C',
-    borderRadius: 12,
-    marginHorizontal: 20,
-    paddingHorizontal: 12,
-    marginBottom: 12,
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.md,
+    marginHorizontal: SPACING.xl,
+    paddingHorizontal: SPACING.md,
+    marginBottom: SPACING.md,
   },
   searchIcon: {
-    marginRight: 8,
+    marginRight: SPACING.sm,
   },
   searchInput: {
     flex: 1,
-    color: '#FFFFFF',
-    fontSize: 14,
-    paddingVertical: 10,
+    color: COLORS.textPrimary,
+    fontSize: FONT.md,
+    paddingVertical: SPACING.sm + 2,
   },
   filterRow: {
     flexDirection: 'row',
-    paddingHorizontal: 20,
-    gap: 10,
-    marginBottom: 12,
+    paddingHorizontal: SPACING.xl,
+    gap: SPACING.sm + 2,
+    marginBottom: SPACING.md,
   },
   filterChip: {
-    paddingVertical: 6,
-    paddingHorizontal: 16,
-    borderRadius: 16,
-    backgroundColor: '#2A2A3C',
+    paddingVertical: SPACING.xs + 2,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: RADIUS.full,
+    backgroundColor: COLORS.surface,
     borderWidth: 1,
-    borderColor: '#3A3A4C',
+    borderColor: COLORS.border,
   },
   filterChipActive: {
-    backgroundColor: '#6C5CE7',
-    borderColor: '#6C5CE7',
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
   },
   filterChipText: {
-    color: '#AAAAAA',
-    fontSize: 13,
+    color: COLORS.textSecondary,
+    fontSize: FONT.base,
     fontWeight: '600',
   },
   filterChipTextActive: {
-    color: '#FFFFFF',
+    color: COLORS.textPrimary,
   },
   listContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: SPACING.xl,
     paddingBottom: 100,
   },
   emptyState: {
@@ -209,30 +198,26 @@ const styles = StyleSheet.create({
     marginTop: 60,
   },
   emptyText: {
-    color: '#AAAAAA',
-    fontSize: 16,
-    marginTop: 12,
+    color: COLORS.textSecondary,
+    fontSize: FONT.xl,
+    marginTop: SPACING.md,
     fontWeight: '500',
   },
   emptySubtext: {
-    color: '#666666',
-    fontSize: 13,
-    marginTop: 4,
+    color: COLORS.textFaint,
+    fontSize: FONT.base,
+    marginTop: SPACING.xs,
   },
   fab: {
     position: 'absolute',
     bottom: 30,
-    right: 24,
+    right: SPACING.xxl,
     width: 58,
     height: 58,
     borderRadius: 29,
-    backgroundColor: '#6C5CE7',
+    backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    ...SHADOW.fab,
   },
 });
