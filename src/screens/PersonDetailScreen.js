@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useIous } from '../context/IouContext';
+import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '../constants/theme';
 
 const PersonDetailScreen = ({ route, navigation }) => {
   const { personId, personName } = route.params;
@@ -91,20 +92,20 @@ const PersonDetailScreen = ({ route, navigation }) => {
 
   const balanceText =
     balance > 0
-      ? { text: `Owes you Rs ${balance.toLocaleString('en-PK')}`, color: '#00B894' }
+      ? { text: `Owes you Rs ${balance.toLocaleString('en-PK')}`, color: COLORS.success }
       : balance < 0
-      ? { text: `You owe Rs ${Math.abs(balance).toLocaleString('en-PK')}`, color: '#FF6B6B' }
-      : { text: 'All settled up', color: '#888888' };
+      ? { text: `You owe Rs ${Math.abs(balance).toLocaleString('en-PK')}`, color: COLORS.danger }
+      : { text: 'All settled up', color: COLORS.textMuted };
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header balance */}
       <View style={styles.balanceCard}>
         <Text style={styles.balanceLabel}>Balance with {personName}</Text>
-        <Text style={[styles.balanceAmount, { color: balanceText.color }]}>{balanceText.text}</Text>
+        <Text style={[styles.balanceAmount, { color: balanceText.color }]} numberOfLines={1}>
+          {balanceText.text}
+        </Text>
       </View>
 
-      {/* IOU history */}
       <FlatList
         data={ious}
         keyExtractor={(item) => item.id.toString()}
@@ -122,20 +123,21 @@ const PersonDetailScreen = ({ route, navigation }) => {
             <TouchableOpacity
               style={[styles.iouRow, isSettled && styles.iouRowSettled]}
               onLongPress={() => handleDeleteIou(item.id)}
+              activeOpacity={0.7}
             >
-              <View style={[styles.iouIcon, { backgroundColor: (isLent ? '#00B894' : '#FF6B6B') + '22' }]}>
+              <View style={[styles.iouIcon, { backgroundColor: (isLent ? COLORS.success : COLORS.danger) + '22' }]}>
                 <Ionicons
                   name={isLent ? 'arrow-up-outline' : 'arrow-down-outline'}
                   size={18}
-                  color={isLent ? '#00B894' : '#FF6B6B'}
+                  color={isLent ? COLORS.success : COLORS.danger}
                 />
               </View>
               <View style={styles.iouInfo}>
-                <Text style={styles.iouText}>
+                <Text style={styles.iouText} numberOfLines={1}>
                   {isLent ? 'You lent' : 'You borrowed'} Rs {item.amount.toLocaleString('en-PK')}
                 </Text>
-                <Text style={styles.iouDate}>
-                  {formattedDate} {isSettled ? '· Settled' : '· Pending'}
+                <Text style={styles.iouDate} numberOfLines={1}>
+                  {formattedDate} · {isSettled ? 'Settled' : 'Pending'}
                   {item.note ? ` · ${item.note}` : ''}
                 </Text>
               </View>
@@ -159,12 +161,10 @@ const PersonDetailScreen = ({ route, navigation }) => {
         }
       />
 
-      {/* FAB */}
       <TouchableOpacity style={styles.fab} onPress={() => setModalVisible(true)}>
-        <Ionicons name="add" size={28} color="#FFFFFF" />
+        <Ionicons name="add" size={28} color={COLORS.textPrimary} />
       </TouchableOpacity>
 
-      {/* Add IOU Modal */}
       <Modal visible={modalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
@@ -192,7 +192,7 @@ const PersonDetailScreen = ({ route, navigation }) => {
             <TextInput
               style={styles.modalInput}
               placeholder="Amount (Rs)"
-              placeholderTextColor="#666"
+              placeholderTextColor={COLORS.textFaint}
               value={amount}
               onChangeText={setAmount}
               keyboardType="numeric"
@@ -200,7 +200,7 @@ const PersonDetailScreen = ({ route, navigation }) => {
             <TextInput
               style={styles.modalInput}
               placeholder="Note (optional)"
-              placeholderTextColor="#666"
+              placeholderTextColor={COLORS.textFaint}
               value={note}
               onChangeText={setNote}
             />
@@ -226,96 +226,104 @@ const PersonDetailScreen = ({ route, navigation }) => {
 export default PersonDetailScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1E1E2E' },
+  container: { flex: 1, backgroundColor: COLORS.background },
   balanceCard: {
-    backgroundColor: '#2A2A3C',
-    marginHorizontal: 20,
-    marginTop: 16,
-    borderRadius: 20,
-    padding: 20,
+    backgroundColor: COLORS.surface,
+    marginHorizontal: SPACING.xl,
+    marginTop: SPACING.lg,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.xl,
     alignItems: 'center',
   },
-  balanceLabel: { color: '#AAAAAA', fontSize: 13, marginBottom: 8 },
-  balanceAmount: { fontSize: 22, fontWeight: '700' },
-  listContent: { paddingHorizontal: 20, paddingBottom: 100 },
-  listTitle: { color: '#FFFFFF', fontSize: 16, fontWeight: '600', marginTop: 24, marginBottom: 12 },
+  balanceLabel: { color: COLORS.textSecondary, fontSize: FONT.base, marginBottom: SPACING.sm },
+  balanceAmount: { fontSize: FONT.title, fontWeight: '700' },
+  listContent: { paddingHorizontal: SPACING.xl, paddingBottom: 100 },
+  listTitle: {
+    color: COLORS.textPrimary,
+    fontSize: FONT.xl,
+    fontWeight: '600',
+    marginTop: SPACING.xxl,
+    marginBottom: SPACING.md,
+  },
   iouRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#2A2A3C',
-    borderRadius: 16,
-    padding: 14,
-    marginBottom: 10,
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.lg - 2,
+    marginBottom: SPACING.md - 2,
   },
   iouRowSettled: { opacity: 0.5 },
   iouIcon: {
-    width: 40, height: 40, borderRadius: 20,
-    justifyContent: 'center', alignItems: 'center', marginRight: 12,
-  },
-  iouInfo: { flex: 1 },
-  iouText: { color: '#FFFFFF', fontSize: 14, fontWeight: '600' },
-  iouDate: { color: '#888888', fontSize: 12, marginTop: 2 },
-  settleButton: {
-    backgroundColor: '#6C5CE7',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 10,
-  },
-  settleButtonText: { color: '#FFFFFF', fontSize: 12, fontWeight: '700' },
-  emptyState: { alignItems: 'center', marginTop: 40 },
-  emptyText: { color: '#777777', fontSize: 14 },
-  deletePersonButton: {
-    marginTop: 30,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
     alignItems: 'center',
-    padding: 14,
+    marginRight: SPACING.md,
   },
-  deletePersonText: { color: '#FF6B6B', fontSize: 14, fontWeight: '600' },
+  iouInfo: { flex: 1, marginRight: SPACING.sm },
+  iouText: { color: COLORS.textPrimary, fontSize: FONT.md, fontWeight: '600' },
+  iouDate: { color: COLORS.textMuted, fontSize: FONT.sm, marginTop: 2 },
+  settleButton: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: SPACING.xs + 2,
+    paddingHorizontal: SPACING.md,
+    borderRadius: RADIUS.sm,
+  },
+  settleButtonText: { color: COLORS.textPrimary, fontSize: FONT.sm, fontWeight: '700' },
+  emptyState: { alignItems: 'center', marginTop: 40 },
+  emptyText: { color: COLORS.textMuted, fontSize: FONT.md },
+  deletePersonButton: {
+    marginTop: SPACING.xxl + 6,
+    alignItems: 'center',
+    padding: SPACING.lg - 2,
+  },
+  deletePersonText: { color: COLORS.danger, fontSize: FONT.md, fontWeight: '600' },
   fab: {
     position: 'absolute',
     bottom: 30,
-    right: 24,
+    right: SPACING.xxl,
     width: 58,
     height: 58,
     borderRadius: 29,
-    backgroundColor: '#6C5CE7',
+    backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    ...SHADOW.fab,
   },
   modalOverlay: {
-    flex: 1, backgroundColor: 'rgba(0,0,0,0.6)',
-    justifyContent: 'center', alignItems: 'center',
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  modalCard: { backgroundColor: '#2A2A3C', borderRadius: 20, padding: 24, width: '85%' },
-  modalTitle: { color: '#FFFFFF', fontSize: 18, fontWeight: '700', marginBottom: 16 },
+  modalCard: { backgroundColor: COLORS.surface, borderRadius: RADIUS.xl, padding: SPACING.xxl, width: '85%' },
+  modalTitle: { color: COLORS.textPrimary, fontSize: FONT.xxl, fontWeight: '700', marginBottom: SPACING.lg },
   directionToggle: {
     flexDirection: 'row',
-    backgroundColor: '#1E1E2E',
-    borderRadius: 12,
+    backgroundColor: COLORS.background,
+    borderRadius: RADIUS.md,
     padding: 4,
-    marginBottom: 16,
+    marginBottom: SPACING.lg,
   },
-  directionButton: { flex: 1, paddingVertical: 10, borderRadius: 9, alignItems: 'center' },
-  directionButtonActiveLent: { backgroundColor: '#00B894' },
-  directionButtonActiveBorrowed: { backgroundColor: '#FF6B6B' },
-  directionText: { color: '#AAAAAA', fontWeight: '600', fontSize: 13 },
-  directionTextActive: { color: '#FFFFFF' },
+  directionButton: { flex: 1, paddingVertical: SPACING.sm + 2, borderRadius: RADIUS.sm - 1, alignItems: 'center' },
+  directionButtonActiveLent: { backgroundColor: COLORS.success },
+  directionButtonActiveBorrowed: { backgroundColor: COLORS.danger },
+  directionText: { color: COLORS.textSecondary, fontWeight: '600', fontSize: FONT.base },
+  directionTextActive: { color: COLORS.textPrimary },
   modalInput: {
-    backgroundColor: '#1E1E2E',
-    borderRadius: 12,
-    padding: 14,
-    color: '#FFFFFF',
-    fontSize: 15,
-    marginBottom: 12,
+    backgroundColor: COLORS.background,
+    borderRadius: RADIUS.md,
+    padding: SPACING.lg - 2,
+    color: COLORS.textPrimary,
+    fontSize: FONT.lg,
+    marginBottom: SPACING.md,
   },
-  modalButtons: { flexDirection: 'row', justifyContent: 'flex-end', gap: 12, marginTop: 8 },
-  modalButton: { paddingVertical: 10, paddingHorizontal: 20, borderRadius: 10 },
+  modalButtons: { flexDirection: 'row', justifyContent: 'flex-end', gap: SPACING.md, marginTop: SPACING.sm },
+  modalButton: { paddingVertical: SPACING.sm + 2, paddingHorizontal: SPACING.xl, borderRadius: RADIUS.sm },
   modalCancelButton: { backgroundColor: 'transparent' },
-  modalCancelText: { color: '#AAAAAA', fontWeight: '600' },
-  modalSaveButton: { backgroundColor: '#6C5CE7' },
-  modalSaveText: { color: '#FFFFFF', fontWeight: '700' },
+  modalCancelText: { color: COLORS.textSecondary, fontWeight: '600' },
+  modalSaveButton: { backgroundColor: COLORS.primary },
+  modalSaveText: { color: COLORS.textPrimary, fontWeight: '700' },
 });
