@@ -2,11 +2,13 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { getCategoryByLabel } from '../constants/categories';
+import { COLORS, SPACING, RADIUS, FONT } from '../constants/theme';
 
 const TransactionItem = ({ transaction, onDelete, onPress }) => {
   const { title, amount, type, category, date, note } = transaction;
   const categoryData = getCategoryByLabel(category, type);
   const isExpense = type === 'expense';
+  const amountColor = isExpense ? COLORS.danger : COLORS.success;
 
   const formattedDate = new Date(date).toLocaleDateString('en-GB', {
     day: 'numeric',
@@ -37,11 +39,11 @@ const TransactionItem = ({ transaction, onDelete, onPress }) => {
 
       <View style={styles.details}>
         <Text style={styles.title} numberOfLines={1}>{title}</Text>
-        <Text style={styles.subtitle}>{category} · {formattedDate}</Text>
+        <Text style={styles.subtitle} numberOfLines={1}>{category} · {formattedDate}</Text>
         {note ? <Text style={styles.note} numberOfLines={1}>{note}</Text> : null}
       </View>
 
-      <Text style={[styles.amount, { color: isExpense ? '#FF6B6B' : '#00B894' }]}>
+      <Text style={[styles.amount, { color: amountColor }]} numberOfLines={1}>
         {isExpense ? '-' : '+'}Rs {amount.toLocaleString('en-PK')}
       </Text>
     </TouchableOpacity>
@@ -54,10 +56,10 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#2A2A3C',
-    borderRadius: 16,
-    padding: 14,
-    marginBottom: 10,
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.lg - 2,
+    marginBottom: SPACING.md - 2,
   },
   iconCircle: {
     width: 42,
@@ -65,30 +67,31 @@ const styles = StyleSheet.create({
     borderRadius: 21,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: SPACING.md,
   },
   details: {
     flex: 1,
+    marginRight: SPACING.sm,
   },
   title: {
-    color: '#FFFFFF',
-    fontSize: 15,
+    color: COLORS.textPrimary,
+    fontSize: FONT.lg,
     fontWeight: '600',
   },
   subtitle: {
-    color: '#AAAAAA',
-    fontSize: 12,
+    color: COLORS.textSecondary,
+    fontSize: FONT.sm,
     marginTop: 2,
   },
   note: {
-    color: '#777777',
-    fontSize: 11,
+    color: COLORS.textMuted,
+    fontSize: FONT.xs,
     marginTop: 2,
     fontStyle: 'italic',
   },
   amount: {
-    fontSize: 14,
+    fontSize: FONT.md,
     fontWeight: '700',
-    marginLeft: 8,
+    flexShrink: 0,
   },
 });
