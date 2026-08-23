@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { COLORS, SPACING, RADIUS, FONT } from '../constants/theme';
 
 const SummaryCard = ({ summary }) => {
   const { income, expense, balance } = summary;
@@ -14,12 +15,12 @@ const SummaryCard = ({ summary }) => {
 
       <View style={styles.row}>
         <View style={styles.statBlock}>
-          <View style={[styles.iconCircle, { backgroundColor: '#00B89422' }]}>
-            <Ionicons name="arrow-down" size={16} color="#00B894" />
+          <View style={[styles.iconCircle, { backgroundColor: COLORS.success + '22' }]}>
+            <Ionicons name="arrow-down" size={16} color={COLORS.success} />
           </View>
-          <View>
+          <View style={styles.statTextGroup}>
             <Text style={styles.statLabel}>Income</Text>
-            <Text style={[styles.statAmount, { color: '#00B894' }]}>
+            <Text style={[styles.statAmount, { color: COLORS.success }]} numberOfLines={1}>
               Rs {income.toLocaleString('en-PK', { minimumFractionDigits: 0 })}
             </Text>
           </View>
@@ -28,12 +29,12 @@ const SummaryCard = ({ summary }) => {
         <View style={styles.divider} />
 
         <View style={styles.statBlock}>
-          <View style={[styles.iconCircle, { backgroundColor: '#FF6B6B22' }]}>
-            <Ionicons name="arrow-up" size={16} color="#FF6B6B" />
+          <View style={[styles.iconCircle, { backgroundColor: COLORS.danger + '22' }]}>
+            <Ionicons name="arrow-up" size={16} color={COLORS.danger} />
           </View>
-          <View>
+          <View style={styles.statTextGroup}>
             <Text style={styles.statLabel}>Expense</Text>
-            <Text style={[styles.statAmount, { color: '#FF6B6B' }]}>
+            <Text style={[styles.statAmount, { color: COLORS.danger }]} numberOfLines={1}>
               Rs {expense.toLocaleString('en-PK', { minimumFractionDigits: 0 })}
             </Text>
           </View>
@@ -47,22 +48,22 @@ export default SummaryCard;
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#2A2A3C',
-    marginHorizontal: 20,
-    marginTop: 16,
-    borderRadius: 20,
-    padding: 20,
+    backgroundColor: COLORS.surface,
+    marginHorizontal: SPACING.xl,
+    marginTop: SPACING.lg,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.xl,
   },
   balanceLabel: {
-    color: '#AAAAAA',
-    fontSize: 13,
-    marginBottom: 6,
+    color: COLORS.textSecondary,
+    fontSize: FONT.base,
+    marginBottom: SPACING.sm - 2,
   },
   balanceAmount: {
-    color: '#FFFFFF',
-    fontSize: 32,
+    color: COLORS.textPrimary,
+    fontSize: FONT.display,
     fontWeight: '700',
-    marginBottom: 20,
+    marginBottom: SPACING.xxl,
   },
   row: {
     flexDirection: 'row',
@@ -72,21 +73,32 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+  },
+  iconCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: SPACING.md - 2,
+  },
+  statTextGroup: {
+    flex: 1,
   },
   divider: {
     width: 1,
     height: 36,
-    backgroundColor: '#3A3A4C',
-    marginHorizontal: 12,
+    backgroundColor: COLORS.border,
+    marginHorizontal: SPACING.md,
   },
   statLabel: {
-    color: '#AAAAAA',
-    fontSize: 12,
+    color: COLORS.textSecondary,
+    fontSize: FONT.sm,
   },
   statAmount: {
-    fontSize: 15,
+    fontSize: FONT.md + 1,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: COLORS.textPrimary,
+    marginTop: 2,
   },
 });
