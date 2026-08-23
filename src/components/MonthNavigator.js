@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { COLORS, SPACING, RADIUS, FONT } from '../constants/theme';
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -25,19 +26,25 @@ const MonthNavigator = ({
         style={[styles.arrow, isPrevDisabled && styles.arrowDisabled]}
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
-        <Ionicons name="chevron-back" size={20} color={isPrevDisabled ? '#444' : '#FFFFFF'} />
+        <Ionicons name="chevron-back" size={20} color={isPrevDisabled ? '#444' : COLORS.textPrimary} />
       </TouchableOpacity>
 
-      <TouchableOpacity
-        onPress={showJumpToday ? onJumpToday : undefined}
-        disabled={!showJumpToday || isNextDisabled}
-        style={styles.labelContainer}
-      >
-        <Text style={styles.label}>{MONTH_NAMES[month - 1]} {year}</Text>
-        {showJumpToday && !isNextDisabled && (
-          <Text style={styles.jumpLink}>Jump to today</Text>
-        )}
-      </TouchableOpacity>
+      {/* Fixed-width center column — label content never shifts the arrows,
+          regardless of whether the month name is "May" or "September" */}
+      <View style={styles.labelContainer}>
+        <TouchableOpacity
+          onPress={showJumpToday ? onJumpToday : undefined}
+          disabled={!showJumpToday || isNextDisabled}
+          activeOpacity={showJumpToday ? 0.6 : 1}
+        >
+          <Text style={styles.label} numberOfLines={1}>
+            {MONTH_NAMES[month - 1]} {year}
+          </Text>
+          <Text style={[styles.jumpLink, (!showJumpToday || isNextDisabled) && styles.jumpLinkHidden]}>
+            Jump to today
+          </Text>
+        </TouchableOpacity>
+      </View>
 
       <TouchableOpacity
         onPress={onNext}
@@ -45,7 +52,7 @@ const MonthNavigator = ({
         style={[styles.arrow, isNextDisabled && styles.arrowDisabled]}
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
-        <Ionicons name="chevron-forward" size={20} color={isNextDisabled ? '#444' : '#FFFFFF'} />
+        <Ionicons name="chevron-forward" size={20} color={isNextDisabled ? '#444' : COLORS.textPrimary} />
       </TouchableOpacity>
     </View>
   );
@@ -57,36 +64,39 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 16,
-    paddingHorizontal: 20,
-    gap: 24,
+    justifyContent: 'space-between',
+    paddingTop: SPACING.lg,
+    paddingHorizontal: SPACING.xl,
   },
   arrow: {
     width: 34,
     height: 34,
     borderRadius: 17,
-    backgroundColor: '#2A2A3C',
+    backgroundColor: COLORS.surface,
     justifyContent: 'center',
     alignItems: 'center',
   },
   arrowDisabled: {
-    backgroundColor: '#22222E',
+    backgroundColor: COLORS.borderSubtle,
   },
   labelContainer: {
+    width: 190,
     alignItems: 'center',
-    minWidth: 150,
   },
   label: {
-    color: '#FFFFFF',
-    fontSize: 17,
+    color: COLORS.textPrimary,
+    fontSize: FONT.xl + 1,
     fontWeight: '700',
     textAlign: 'center',
   },
   jumpLink: {
-    color: '#6C5CE7',
-    fontSize: 11,
+    color: COLORS.primary,
+    fontSize: FONT.xs,
     fontWeight: '600',
+    textAlign: 'center',
     marginTop: 2,
+  },
+  jumpLinkHidden: {
+    opacity: 0,
   },
 });
