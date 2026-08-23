@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useIous } from '../context/IouContext';
+import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '../constants/theme';
 
 const PeopleScreen = ({ navigation }) => {
   const { people, iouSummary, createPerson } = useIous();
@@ -29,31 +30,29 @@ const PeopleScreen = ({ navigation }) => {
   };
 
   const renderBalanceText = (balance) => {
-    if (balance > 0) return { text: `owes you Rs ${balance.toLocaleString('en-PK')}`, color: '#00B894' };
-    if (balance < 0) return { text: `you owe Rs ${Math.abs(balance).toLocaleString('en-PK')}`, color: '#FF6B6B' };
-    return { text: 'settled up', color: '#888888' };
+    if (balance > 0) return { text: `owes you Rs ${balance.toLocaleString('en-PK')}`, color: COLORS.success };
+    if (balance < 0) return { text: `you owe Rs ${Math.abs(balance).toLocaleString('en-PK')}`, color: COLORS.danger };
+    return { text: 'settled up', color: COLORS.textMuted };
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Summary Card */}
       <View style={styles.summaryCard}>
         <View style={styles.summaryBlock}>
           <Text style={styles.summaryLabel}>Owed to you</Text>
-          <Text style={[styles.summaryAmount, { color: '#00B894' }]}>
+          <Text style={[styles.summaryAmount, { color: COLORS.success }]} numberOfLines={1}>
             Rs {iouSummary.owedToYou.toLocaleString('en-PK')}
           </Text>
         </View>
         <View style={styles.summaryDivider} />
         <View style={styles.summaryBlock}>
           <Text style={styles.summaryLabel}>You owe</Text>
-          <Text style={[styles.summaryAmount, { color: '#FF6B6B' }]}>
+          <Text style={[styles.summaryAmount, { color: COLORS.danger }]} numberOfLines={1}>
             Rs {iouSummary.youOwe.toLocaleString('en-PK')}
           </Text>
         </View>
       </View>
 
-      {/* People List */}
       <FlatList
         data={people}
         keyExtractor={(item) => item.id.toString()}
@@ -70,8 +69,8 @@ const PeopleScreen = ({ navigation }) => {
                 <Text style={styles.avatarText}>{item.name.charAt(0).toUpperCase()}</Text>
               </View>
               <View style={styles.personInfo}>
-                <Text style={styles.personName}>{item.name}</Text>
-                <Text style={[styles.personBalance, { color }]}>{text}</Text>
+                <Text style={styles.personName} numberOfLines={1}>{item.name}</Text>
+                <Text style={[styles.personBalance, { color }]} numberOfLines={1}>{text}</Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color="#666" />
             </TouchableOpacity>
@@ -86,12 +85,10 @@ const PeopleScreen = ({ navigation }) => {
         }
       />
 
-      {/* FAB */}
       <TouchableOpacity style={styles.fab} onPress={() => setModalVisible(true)}>
-        <Ionicons name="person-add" size={26} color="#FFFFFF" />
+        <Ionicons name="person-add" size={26} color={COLORS.textPrimary} />
       </TouchableOpacity>
 
-      {/* Add Person Modal */}
       <Modal visible={modalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
@@ -99,7 +96,7 @@ const PeopleScreen = ({ navigation }) => {
             <TextInput
               style={styles.modalInput}
               placeholder="Name"
-              placeholderTextColor="#666"
+              placeholderTextColor={COLORS.textFaint}
               value={newName}
               onChangeText={setNewName}
               autoFocus
@@ -111,10 +108,7 @@ const PeopleScreen = ({ navigation }) => {
               >
                 <Text style={styles.modalCancelText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.modalSaveButton]}
-                onPress={handleAddPerson}
-              >
+              <TouchableOpacity style={[styles.modalButton, styles.modalSaveButton]} onPress={handleAddPerson}>
                 <Text style={styles.modalSaveText}>Add</Text>
               </TouchableOpacity>
             </View>
@@ -130,15 +124,15 @@ export default PeopleScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1E1E2E',
+    backgroundColor: COLORS.background,
   },
   summaryCard: {
     flexDirection: 'row',
-    backgroundColor: '#2A2A3C',
-    marginHorizontal: 20,
-    marginTop: 16,
-    borderRadius: 20,
-    padding: 20,
+    backgroundColor: COLORS.surface,
+    marginHorizontal: SPACING.xl,
+    marginTop: SPACING.lg,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.xl,
   },
   summaryBlock: {
     flex: 1,
@@ -146,61 +140,62 @@ const styles = StyleSheet.create({
   },
   summaryDivider: {
     width: 1,
-    backgroundColor: '#3A3A4C',
-    marginHorizontal: 12,
+    backgroundColor: COLORS.border,
+    marginHorizontal: SPACING.md,
   },
   summaryLabel: {
-    color: '#AAAAAA',
-    fontSize: 12,
-    marginBottom: 6,
+    color: COLORS.textSecondary,
+    fontSize: FONT.sm,
+    marginBottom: SPACING.xs + 2,
   },
   summaryAmount: {
-    fontSize: 18,
+    fontSize: FONT.xxl,
     fontWeight: '700',
   },
   listContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: SPACING.xl,
     paddingBottom: 100,
   },
   listTitle: {
-    color: '#FFFFFF',
-    fontSize: 16,
+    color: COLORS.textPrimary,
+    fontSize: FONT.xl,
     fontWeight: '600',
-    marginTop: 24,
-    marginBottom: 12,
+    marginTop: SPACING.xxl,
+    marginBottom: SPACING.md,
   },
   personRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#2A2A3C',
-    borderRadius: 16,
-    padding: 14,
-    marginBottom: 10,
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.lg - 2,
+    marginBottom: SPACING.md - 2,
   },
   avatar: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#6C5CE7',
+    backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: SPACING.md,
   },
   avatarText: {
-    color: '#FFFFFF',
-    fontSize: 18,
+    color: COLORS.textPrimary,
+    fontSize: FONT.xxl,
     fontWeight: '700',
   },
   personInfo: {
     flex: 1,
+    marginRight: SPACING.sm,
   },
   personName: {
-    color: '#FFFFFF',
-    fontSize: 15,
+    color: COLORS.textPrimary,
+    fontSize: FONT.lg,
     fontWeight: '600',
   },
   personBalance: {
-    fontSize: 13,
+    fontSize: FONT.base,
     marginTop: 2,
   },
   emptyState: {
@@ -208,31 +203,27 @@ const styles = StyleSheet.create({
     marginTop: 60,
   },
   emptyText: {
-    color: '#AAAAAA',
-    fontSize: 16,
-    marginTop: 12,
+    color: COLORS.textSecondary,
+    fontSize: FONT.xl,
+    marginTop: SPACING.md,
     fontWeight: '500',
   },
   emptySubtext: {
-    color: '#666666',
-    fontSize: 13,
-    marginTop: 4,
+    color: COLORS.textFaint,
+    fontSize: FONT.base,
+    marginTop: SPACING.xs,
   },
   fab: {
     position: 'absolute',
     bottom: 30,
-    right: 24,
+    right: SPACING.xxl,
     width: 58,
     height: 58,
     borderRadius: 29,
-    backgroundColor: '#6C5CE7',
+    backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    ...SHADOW.fab,
   },
   modalOverlay: {
     flex: 1,
@@ -241,47 +232,47 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalCard: {
-    backgroundColor: '#2A2A3C',
-    borderRadius: 20,
-    padding: 24,
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.xxl,
     width: '85%',
   },
   modalTitle: {
-    color: '#FFFFFF',
-    fontSize: 18,
+    color: COLORS.textPrimary,
+    fontSize: FONT.xxl,
     fontWeight: '700',
-    marginBottom: 16,
+    marginBottom: SPACING.lg,
   },
   modalInput: {
-    backgroundColor: '#1E1E2E',
-    borderRadius: 12,
-    padding: 14,
-    color: '#FFFFFF',
-    fontSize: 15,
-    marginBottom: 20,
+    backgroundColor: COLORS.background,
+    borderRadius: RADIUS.md,
+    padding: SPACING.lg - 2,
+    color: COLORS.textPrimary,
+    fontSize: FONT.lg,
+    marginBottom: SPACING.xl,
   },
   modalButtons: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    gap: 12,
+    gap: SPACING.md,
   },
   modalButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 10,
+    paddingVertical: SPACING.sm + 2,
+    paddingHorizontal: SPACING.xl,
+    borderRadius: RADIUS.sm,
   },
   modalCancelButton: {
     backgroundColor: 'transparent',
   },
   modalCancelText: {
-    color: '#AAAAAA',
+    color: COLORS.textSecondary,
     fontWeight: '600',
   },
   modalSaveButton: {
-    backgroundColor: '#6C5CE7',
+    backgroundColor: COLORS.primary,
   },
   modalSaveText: {
-    color: '#FFFFFF',
+    color: COLORS.textPrimary,
     fontWeight: '700',
   },
 });
