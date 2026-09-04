@@ -7,32 +7,33 @@ import {
   getTransactionsByMonth,
   getSummaryByMonth,
   getCategoryTotalsByMonth,
+  setBudget,
+  deleteBudget,
+  getBudgetProgress,
 } from '../database/db';
 
 const TransactionContext = createContext(null);
 
-// How far back a user can browse — generous enough for real use, prevents infinite scrolling
 const MAX_MONTHS_BACK = 60; // 5 years
 
 export const TransactionProvider = ({ children }) => {
   const now = new Date();
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
-  const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1); // 1-12
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
 
   const [transactions, setTransactions] = useState([]);
   const [summary, setSummary] = useState({ income: 0, expense: 0, balance: 0 });
   const [categoryTotals, setCategoryTotals] = useState([]);
+  const [budgetProgress, setBudgetProgress] = useState([]);
   const [isReady, setIsReady] = useState(false);
 
-  // Pull fresh data for the currently selected month
   const refresh = useCallback((year = selectedYear, month = selectedMonth) => {
     setTransactions(getTransactionsByMonth(year, month));
     setSummary(getSummaryByMonth(year, month));
     setCategoryTotals(getCategoryTotalsByMonth(year, month));
+    setBudgetProgress(getBudgetProgress(year, month));
   }, [selectedYear, selectedMonth]);
 
-  // Always starts on today's real year/month — fresh every app launch since
-  // this state is initialized from `new Date()` above, not persisted anywhere
   const setup = useCallback(() => {
     initDatabase();
     refresh(selectedYear, selectedMonth);
@@ -87,8 +88,6 @@ export const TransactionProvider = ({ children }) => {
     refresh(year, month);
   }, [refresh]);
 
-  // Prev is disabled only after a generous 5-year lookback — not tied to
-  // whether data exists, so you can always browse to an empty past month
   const isPrevDisabled = useMemo(() => {
     const today = new Date();
     const monthsDiff =
@@ -96,7 +95,6 @@ export const TransactionProvider = ({ children }) => {
     return monthsDiff >= MAX_MONTHS_BACK;
   }, [selectedYear, selectedMonth]);
 
-  // Next is disabled once we're at the real current month — no future browsing
   const isNextDisabled = useMemo(() => {
     const today = new Date();
     const currentYear = today.getFullYear();
@@ -104,10 +102,23 @@ export const TransactionProvider = ({ children }) => {
     return selectedYear === currentYear && selectedMonth === currentMonth;
   }, [selectedYear, selectedMonth]);
 
+  // ----- Budget actions -----
+
+  const saveBudget = useCallback((category, monthlyLimit) => {
+    setBudget(category, monthlyLimit);
+    refresh();
+  }, [refresh]);
+
+  const removeBudget = useCallback((category) => {
+    deleteBudget(category);
+    refresh();
+  }, [refresh]);
+
   const value = {
     transactions,
     summary,
     categoryTotals,
+    budgetProgress,
     isReady,
     selectedYear,
     selectedMonth,
@@ -121,6 +132,8 @@ export const TransactionProvider = ({ children }) => {
     goToPrevMonth,
     goToNextMonth,
     goToCurrentMonth,
+    saveBudget,
+    removeBudget,
   };
 
   return (
