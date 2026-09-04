@@ -1,9 +1,8 @@
 import * as SQLite from 'expo-sqlite';
 
-// Open (or create) the database
 const db = SQLite.openDatabaseSync('expenses.db');
 
-// Initialize the tables — call this once when app starts
+// Initialize all tables — call this once when app starts
 export const initDatabase = () => {
   db.execSync(`
     CREATE TABLE IF NOT EXISTS transactions (
@@ -38,11 +37,17 @@ export const initDatabase = () => {
       FOREIGN KEY (person_id) REFERENCES people (id)
     );
   `);
+
+  db.execSync(`
+    CREATE TABLE IF NOT EXISTS budgets (
+      category TEXT PRIMARY KEY,
+      monthly_limit REAL NOT NULL
+    );
+  `);
 };
 
 // ===== TRANSACTIONS =====
 
-// CREATE — add a new transaction
 export const addTransaction = (transaction) => {
   const { title, amount, type, category, date, note } = transaction;
   const result = db.runSync(
@@ -53,24 +58,14 @@ export const addTransaction = (transaction) => {
   return result.lastInsertRowId;
 };
 
-// READ — get all transactions, most recent first
 export const getAllTransactions = () => {
-  const rows = db.getAllSync(
-    `SELECT * FROM transactions ORDER BY date DESC;`
-  );
-  return rows;
+  return db.getAllSync(`SELECT * FROM transactions ORDER BY date DESC;`);
 };
 
-// READ — get a single transaction by id (useful for edit screen later)
 export const getTransactionById = (id) => {
-  const row = db.getFirstSync(
-    `SELECT * FROM transactions WHERE id = ?;`,
-    [id]
-  );
-  return row;
+  return db.getFirstSync(`SELECT * FROM transactions WHERE id = ?;`, [id]);
 };
 
-// UPDATE — edit an existing transaction
 export const updateTransaction = (id, transaction) => {
   const { title, amount, type, category, date, note } = transaction;
   db.runSync(
@@ -81,12 +76,10 @@ export const updateTransaction = (id, transaction) => {
   );
 };
 
-// DELETE — remove a transaction
 export const deleteTransaction = (id) => {
   db.runSync(`DELETE FROM transactions WHERE id = ?;`, [id]);
 };
 
-// Helper — get totals for summary card (income, expense, balance)
 export const getSummary = () => {
   const income = db.getFirstSync(
     `SELECT COALESCE(SUM(amount), 0) as total FROM transactions WHERE type = 'income';`
@@ -101,112 +94,18 @@ export const getSummary = () => {
   };
 };
 
-// Helper — get totals grouped by category (for the Stats/chart screen)
 export const getCategoryTotals = () => {
-  const rows = db.getAllSync(
+  return db.getAllSync(
     `SELECT category, SUM(amount) as total
      FROM transactions
      WHERE type = 'expense'
      GROUP BY category
      ORDER BY total DESC;`
   );
-  return rows;
-};
-
-// ===== BORROW/LEND (IOU) FEATURE =====
-
-// ----- People CRUD -----
-
-export const addPerson = (person) => {
-  const { name, note } = person;
-  const result = db.runSync(
-    `INSERT INTO people (name, note) VALUES (?, ?);`,
-    [name, note || '']
-  );
-  return result.lastInsertRowId;
-};
-
-export const getAllPeople = () => {
-  return db.getAllSync(`SELECT * FROM people ORDER BY name ASC;`);
-};
-
-export const deletePerson = (id) => {
-  db.runSync(`DELETE FROM ious WHERE person_id = ?;`, [id]);
-  db.runSync(`DELETE FROM people WHERE id = ?;`, [id]);
-};
-
-// ----- IOU CRUD -----
-
-export const addIou = (iou) => {
-  const { person_id, amount, direction, date, due_date, note } = iou;
-  const result = db.runSync(
-    `INSERT INTO ious (person_id, amount, direction, date, due_date, status, note)
-     VALUES (?, ?, ?, ?, ?, 'pending', ?);`,
-    [person_id, amount, direction, date, due_date || null, note || '']
-  );
-  return result.lastInsertRowId;
-};
-
-export const getIousByPerson = (personId) => {
-  return db.getAllSync(
-    `SELECT * FROM ious WHERE person_id = ? ORDER BY date DESC;`,
-    [personId]
-  );
-};
-
-export const settleIou = (id) => {
-  db.runSync(`UPDATE ious SET status = 'settled' WHERE id = ?;`, [id]);
-};
-
-export const deleteIou = (id) => {
-  db.runSync(`DELETE FROM ious WHERE id = ?;`, [id]);
-};
-
-// ----- Balance helpers -----
-
-// Net balance for one person: positive = they owe you, negative = you owe them
-export const getPersonBalance = (personId) => {
-  const lent = db.getFirstSync(
-    `SELECT COALESCE(SUM(amount), 0) as total FROM ious
-     WHERE person_id = ? AND direction = 'lent' AND status = 'pending';`,
-    [personId]
-  );
-  const borrowed = db.getFirstSync(
-    `SELECT COALESCE(SUM(amount), 0) as total FROM ious
-     WHERE person_id = ? AND direction = 'borrowed' AND status = 'pending';`,
-    [personId]
-  );
-  return lent.total - borrowed.total;
-};
-
-// All people with their computed balance — powers the People list screen
-export const getAllPeopleWithBalances = () => {
-  const people = getAllPeople();
-  return people.map((person) => ({
-    ...person,
-    balance: getPersonBalance(person.id),
-  }));
-};
-
-// Overall totals across everyone — useful for a summary card on the People screen
-export const getOverallIouSummary = () => {
-  const owedToYou = db.getFirstSync(
-    `SELECT COALESCE(SUM(amount), 0) as total FROM ious
-     WHERE direction = 'lent' AND status = 'pending';`
-  );
-  const youOwe = db.getFirstSync(
-    `SELECT COALESCE(SUM(amount), 0) as total FROM ious
-     WHERE direction = 'borrowed' AND status = 'pending';`
-  );
-  return {
-    owedToYou: owedToYou.total,
-    youOwe: youOwe.total,
-  };
 };
 
 // ===== MONTH-SCOPED QUERIES =====
 
-// Helper — format a JS Date's year/month into 'YYYY-MM' for SQLite comparison
 const formatYearMonth = (year, month) => {
   const paddedMonth = String(month).padStart(2, '0');
   return `${year}-${paddedMonth}`;
@@ -253,13 +152,134 @@ export const getCategoryTotalsByMonth = (year, month) => {
   );
 };
 
-// Returns the earliest transaction's year/month — used to stop "previous month"
-// navigation once we've gone back as far as the data actually goes
 export const getEarliestTransactionMonth = () => {
-  const row = db.getFirstSync(
-    `SELECT MIN(date) as earliest FROM transactions;`
+  const row = db.getFirstSync(`SELECT MIN(date) as earliest FROM transactions;`);
+  return row.earliest;
+};
+
+// ===== BORROW/LEND (IOU) FEATURE =====
+
+export const addPerson = (person) => {
+  const { name, note } = person;
+  const result = db.runSync(
+    `INSERT INTO people (name, note) VALUES (?, ?);`,
+    [name, note || '']
   );
-  return row.earliest; // ISO string or null if no transactions exist
+  return result.lastInsertRowId;
+};
+
+export const getAllPeople = () => {
+  return db.getAllSync(`SELECT * FROM people ORDER BY name ASC;`);
+};
+
+export const deletePerson = (id) => {
+  db.runSync(`DELETE FROM ious WHERE person_id = ?;`, [id]);
+  db.runSync(`DELETE FROM people WHERE id = ?;`, [id]);
+};
+
+export const addIou = (iou) => {
+  const { person_id, amount, direction, date, due_date, note } = iou;
+  const result = db.runSync(
+    `INSERT INTO ious (person_id, amount, direction, date, due_date, status, note)
+     VALUES (?, ?, ?, ?, ?, 'pending', ?);`,
+    [person_id, amount, direction, date, due_date || null, note || '']
+  );
+  return result.lastInsertRowId;
+};
+
+export const getIousByPerson = (personId) => {
+  return db.getAllSync(
+    `SELECT * FROM ious WHERE person_id = ? ORDER BY date DESC;`,
+    [personId]
+  );
+};
+
+export const settleIou = (id) => {
+  db.runSync(`UPDATE ious SET status = 'settled' WHERE id = ?;`, [id]);
+};
+
+export const deleteIou = (id) => {
+  db.runSync(`DELETE FROM ious WHERE id = ?;`, [id]);
+};
+
+export const getPersonBalance = (personId) => {
+  const lent = db.getFirstSync(
+    `SELECT COALESCE(SUM(amount), 0) as total FROM ious
+     WHERE person_id = ? AND direction = 'lent' AND status = 'pending';`,
+    [personId]
+  );
+  const borrowed = db.getFirstSync(
+    `SELECT COALESCE(SUM(amount), 0) as total FROM ious
+     WHERE person_id = ? AND direction = 'borrowed' AND status = 'pending';`,
+    [personId]
+  );
+  return lent.total - borrowed.total;
+};
+
+export const getAllPeopleWithBalances = () => {
+  const people = getAllPeople();
+  return people.map((person) => ({
+    ...person,
+    balance: getPersonBalance(person.id),
+  }));
+};
+
+export const getOverallIouSummary = () => {
+  const owedToYou = db.getFirstSync(
+    `SELECT COALESCE(SUM(amount), 0) as total FROM ious
+     WHERE direction = 'lent' AND status = 'pending';`
+  );
+  const youOwe = db.getFirstSync(
+    `SELECT COALESCE(SUM(amount), 0) as total FROM ious
+     WHERE direction = 'borrowed' AND status = 'pending';`
+  );
+  return {
+    owedToYou: owedToYou.total,
+    youOwe: youOwe.total,
+  };
+};
+
+// ===== BUDGETS =====
+
+export const setBudget = (category, monthlyLimit) => {
+  db.runSync(
+    `INSERT OR REPLACE INTO budgets (category, monthly_limit) VALUES (?, ?);`,
+    [category, monthlyLimit]
+  );
+};
+
+export const getAllBudgets = () => {
+  return db.getAllSync(`SELECT * FROM budgets;`);
+};
+
+export const deleteBudget = (category) => {
+  db.runSync(`DELETE FROM budgets WHERE category = ?;`, [category]);
+};
+
+export const getBudgetProgress = (year, month) => {
+  const paddedMonth = String(month).padStart(2, '0');
+  const yearMonth = `${year}-${paddedMonth}`;
+
+  const spent = db.getAllSync(
+    `SELECT category, SUM(amount) as total
+     FROM transactions
+     WHERE type = 'expense' AND strftime('%Y-%m', date) = ?
+     GROUP BY category;`,
+    [yearMonth]
+  );
+
+  const budgets = getAllBudgets();
+
+  return budgets.map((budget) => {
+    const spentRow = spent.find((s) => s.category === budget.category);
+    const spentAmount = spentRow ? spentRow.total : 0;
+    return {
+      category: budget.category,
+      limit: budget.monthly_limit,
+      spent: spentAmount,
+      percentage: budget.monthly_limit > 0 ? (spentAmount / budget.monthly_limit) * 100 : 0,
+    };
+  });
 };
 
 export default db;
