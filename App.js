@@ -1,13 +1,13 @@
 import React, { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { TransactionProvider, useTransactions } from './src/context/TransactionContext';
+import { IouProvider } from './src/context/IouContext';
 import AppNavigator from './src/navigation/AppNavigator';
-import { IouProvider, useIous } from './src/context/IouContext';
 
-// Inner component so it can access the context (setup/isReady) after the provider mounts
 const Root = () => {
   const { setup, isReady } = useTransactions();
 
@@ -32,14 +32,16 @@ const Root = () => {
 
 export default function App() {
   return (
-<SafeAreaProvider>
-      <TransactionProvider>
-        <IouProvider>
-          <Root />
-        </IouProvider>
-      </TransactionProvider>
-      <StatusBar style="light" />
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <TransactionProvider>
+          <IouProvider>
+            <Root />
+          </IouProvider>
+        </TransactionProvider>
+        <StatusBar style="light" />
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
 
