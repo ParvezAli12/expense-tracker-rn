@@ -4,6 +4,7 @@ import { Swipeable } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import { getCategoryByLabel } from '../constants/categories';
 import { COLORS, SPACING, RADIUS, FONT } from '../constants/theme';
+import { hapticMedium } from '../utils/haptics';
 
 const TransactionItem = ({ transaction, onDelete, onPress }) => {
   const { title, amount, type, category, date, note } = transaction;
@@ -28,6 +29,7 @@ const TransactionItem = ({ transaction, onDelete, onPress }) => {
           style: 'destructive',
           onPress: () => {
             swipeableRef.current?.close();
+            hapticMedium();
             onDelete();
           },
         },
