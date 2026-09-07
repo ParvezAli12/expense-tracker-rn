@@ -1,24 +1,26 @@
-import * as Haptics from 'expo-haptics';
+import { Vibration } from 'react-native';
 
-// Centralized haptic helpers — keeps the feel consistent across the whole
-// app instead of every screen picking its own random feedback style.
+// Uses React Native's built-in Vibration API instead of expo-haptics.
+// This drives the vibration motor directly and isn't gated by Android's
+// "Touch feedback" system setting — works out of the box, no phone
+// settings need to be touched.
 
-// Light tap — use for routine confirmations (save, add)
+// Short buzz — routine confirmations (save, add)
 export const hapticLight = () => {
-  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  Vibration.vibrate(30);
 };
 
-// Medium tap — use for more significant actions (delete, settle)
+// Slightly longer buzz — more significant actions (delete, settle)
 export const hapticMedium = () => {
-  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  Vibration.vibrate(50);
 };
 
-// Success pulse — use when something good/complete happens (budget met, settled up)
+// Double-pulse — positive/complete moments (settled up, budget met)
 export const hapticSuccess = () => {
-  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  Vibration.vibrate([0, 40, 60, 40]); // pattern: wait, buzz, pause, buzz
 };
 
-// Warning pulse — use for things needing attention (over budget)
+// Slightly sharper double-pulse — needs-attention moments (over budget)
 export const hapticWarning = () => {
-  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+  Vibration.vibrate([0, 60, 50, 60]);
 };
