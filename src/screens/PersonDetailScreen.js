@@ -14,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useIous } from '../context/IouContext';
 import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '../constants/theme';
+import { hapticLight, hapticSuccess } from '../utils/haptics';
 
 const PersonDetailScreen = ({ route, navigation }) => {
   const { personId, personName } = route.params;
@@ -54,6 +55,7 @@ const PersonDetailScreen = ({ route, navigation }) => {
       note: note.trim(),
     });
 
+    hapticLight();
     setAmount('');
     setNote('');
     setModalVisible(false);
@@ -61,6 +63,7 @@ const PersonDetailScreen = ({ route, navigation }) => {
   };
 
   const handleSettle = (id) => {
+    hapticSuccess();
     markIouSettled(id);
     loadIous();
   };
