@@ -13,6 +13,7 @@ import {
 import { useTransactions } from '../context/TransactionContext';
 import { getCategoriesByType, getCategoryByLabel } from '../constants/categories';
 import CategoryPicker from '../components/CategoryPicker';
+import { hapticLight } from '../utils/haptics';
 
 const AddTransactionScreen = ({ navigation, route }) => {
   const { createTransaction, editTransaction } = useTransactions();
@@ -76,9 +77,10 @@ const AddTransactionScreen = ({ navigation, route }) => {
       createTransaction(payload);
     }
 
+    hapticLight();
     navigation.goBack();
   };
-
+  
   const handleDelete = () => {
     Alert.alert(
       'Delete Transaction',
