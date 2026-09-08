@@ -1,7 +1,35 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, RADIUS, FONT } from '../constants/theme';
+
+// A single animated number — counts smoothly from its previous value to `value`
+const AnimatedAmount = ({ value, style, prefix = 'Rs ' }) => {
+  const animatedValue = useRef(new Animated.Value(value)).current;
+  const [displayValue, setDisplayValue] = React.useState(value);
+
+  useEffect(() => {
+    const listenerId = animatedValue.addListener(({ value: v }) => {
+      setDisplayValue(Math.round(v));
+    });
+
+    Animated.timing(animatedValue, {
+      toValue: value,
+      duration: 600,
+      useNativeDriver: false, // animating a numeric value we read via listener, not a style transform
+    }).start();
+
+    return () => {
+      animatedValue.removeListener(listenerId);
+    };
+  }, [value]);
+
+  return (
+    <Text style={style}>
+      {prefix}{displayValue.toLocaleString('en-PK')}
+    </Text>
+  );
+};
 
 const SummaryCard = ({ summary }) => {
   const { income, expense, balance } = summary;
@@ -9,9 +37,7 @@ const SummaryCard = ({ summary }) => {
   return (
     <View style={styles.card}>
       <Text style={styles.balanceLabel}>Total Balance</Text>
-      <Text style={styles.balanceAmount}>
-        Rs {balance.toLocaleString('en-PK', { minimumFractionDigits: 0 })}
-      </Text>
+      <AnimatedAmount value={balance} style={styles.balanceAmount} />
 
       <View style={styles.row}>
         <View style={styles.statBlock}>
@@ -20,9 +46,10 @@ const SummaryCard = ({ summary }) => {
           </View>
           <View style={styles.statTextGroup}>
             <Text style={styles.statLabel}>Income</Text>
-            <Text style={[styles.statAmount, { color: COLORS.success }]} numberOfLines={1}>
-              Rs {income.toLocaleString('en-PK', { minimumFractionDigits: 0 })}
-            </Text>
+            <AnimatedAmount
+              value={income}
+              style={[styles.statAmount, { color: COLORS.success }]}
+            />
           </View>
         </View>
 
@@ -34,9 +61,10 @@ const SummaryCard = ({ summary }) => {
           </View>
           <View style={styles.statTextGroup}>
             <Text style={styles.statLabel}>Expense</Text>
-            <Text style={[styles.statAmount, { color: COLORS.danger }]} numberOfLines={1}>
-              Rs {expense.toLocaleString('en-PK', { minimumFractionDigits: 0 })}
-            </Text>
+            <AnimatedAmount
+              value={expense}
+              style={[styles.statAmount, { color: COLORS.danger }]}
+            />
           </View>
         </View>
       </View>
