@@ -17,7 +17,12 @@ export const COLORS = {
   primary: '#6C5CE7',
   success: '#00B894',
   danger: '#FF6B6B',
+
+  onboardingBg: '#151B2B',
+  accentGreen: '#00C897',
 };
+
+
 
 // A fixed spacing scale — every margin/padding in the app should be one of
 // these values. Prevents "13px here, 14px there" drift between screens.
