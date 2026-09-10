@@ -7,6 +7,7 @@ import StatsScreen from '../screens/StatsScreen';
 import PeopleScreen from '../screens/PeopleScreen';
 import AddTransactionScreen from '../screens/AddTransactionScreen';
 import PersonDetailScreen from '../screens/PersonDetailScreen';
+import WelcomeScreen from '../screens/WelcomeScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -62,15 +63,21 @@ const MainTabs = () => {
 };
 
 // Root stack — holds the tab bar, plus modal/pushed screens that appear on top of it
-const AppNavigator = () => {
+const AppNavigator = ({ initialRouteName }) => {
   return (
     <Stack.Navigator
+      initialRouteName={initialRouteName}
       screenOptions={{
         headerStyle: { backgroundColor: '#1E1E2E' },
         headerTintColor: '#FFFFFF',
         headerTitleStyle: { fontWeight: '600' },
       }}
     >
+      <Stack.Screen
+        name="Welcome"
+        component={WelcomeScreen}
+        options={{ headerShown: false }}
+      />
       <Stack.Screen
         name="MainTabs"
         component={MainTabs}
