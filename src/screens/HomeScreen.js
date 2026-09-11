@@ -13,7 +13,7 @@ import { useTransactions } from '../context/TransactionContext';
 import SummaryCard from '../components/SummaryCard';
 import TransactionItem from '../components/TransactionItem';
 import MonthNavigator from '../components/MonthNavigator';
-import { COLORS, SPACING, RADIUS, FONT, SHADOW } from '../constants/theme';
+import { COLORS, SPACING, RADIUS, FONT } from '../constants/theme';
 
 const FILTERS = [
   { id: 'all', label: 'All' },
@@ -122,10 +122,6 @@ const HomeScreen = ({ navigation }) => {
           </View>
         }
       />
-
-      <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate('AddTransaction')}>
-        <Ionicons name="add" size={30} color={COLORS.textPrimary} />
-      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -207,17 +203,5 @@ const styles = StyleSheet.create({
     color: COLORS.textFaint,
     fontSize: FONT.base,
     marginTop: SPACING.xs,
-  },
-  fab: {
-    position: 'absolute',
-    bottom: 30,
-    right: SPACING.xxl,
-    width: 58,
-    height: 58,
-    borderRadius: 29,
-    backgroundColor: COLORS.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    ...SHADOW.fab,
   },
 });
